@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Solar Panel Cell Detection & Classification</title>
+  <style>
+    /* Reset & base */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #e6f0ff 0%, #ffffff 100%);
+      color: #222;
+      text-align: center;
+      padding: 3rem 1rem 4rem;
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-weight: 700;
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+      letter-spacing: 0.04em;
+      color: #0055cc;
+      text-shadow: 0 0 3px #a3c1ff;
+    }
+
+    form {
+      background: white;
+      max-width: 480px;
+      margin: 0 auto 3rem;
+      padding: 2rem 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 85, 204, 0.15);
+      transition: box-shadow 0.3s ease;
+    }
+    form:hover {
+      box-shadow: 0 12px 30px rgba(0, 85, 204, 0.25);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+      max-width: 350px;
+      margin: 0 auto 1.5rem;
+    }
+
+    input[type="file"] {
+      opacity: 0;
+      width: 100%;
+      height: 44px;
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      z-index: 2;
+    }
+
+    .file-input-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #28a745;
+      color: white;
+      font-weight: 600;
+      font-size: 1.1rem;
+      padding: 0.8rem 1.2rem;
+      border-radius: 8px;
+      user-select: none;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      width: 100%;
+    }
+    .file-input-label:hover {
+      background-color: #1e7e34;
+      box-shadow: 0 6px 16px rgba(30, 126, 52, 0.6);
+    }
+
+    button[type="submit"] {
+      display: inline-block;
+      background: #ffc107;
+      color: #222;
+      font-weight: 700;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 10px;
+      padding: 0.75rem 2.2rem;
+      cursor: pointer;
+      box-shadow: 0 6px 15px rgba(255, 193, 7, 0.4);
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      margin-top: 0.8rem;
+      user-select: none;
+    }
+    button[type="submit"]:hover {
+      background: #e0a800;
+      box-shadow: 0 8px 20px rgba(224, 168, 0, 0.6);
+    }
+    button[type="submit"]:disabled {
+      background: #fff3cd;
+      cursor: not-allowed;
+      box-shadow: none;
+      color: #6c757d;
+    }
+
+    .images-container {
+      display: flex;
+      overflow-x: auto;
+      gap: 2rem;
+      padding: 1rem;
+      margin: 0 auto;
+      max-width: 1400px;
+      scrollbar-width: thin;
+      scrollbar-color: #007bff #d0e1ff;
+    }
+
+    .images-container::-webkit-scrollbar {
+      height: 8px;
+    }
+    .images-container::-webkit-scrollbar-track {
+      background: #d0e1ff;
+      border-radius: 4px;
+    }
+    .images-container::-webkit-scrollbar-thumb {
+      background-color: #007bff;
+      border-radius: 4px;
+    }
+
+    .image-box {
+      min-width: 720px;      /* increased from 520 */
+      max-width: 1080px;     /* increased from 800 */
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 12px 30px rgba(0, 85, 204, 0.1);
+      padding: 1.5rem 2rem;
+      position: relative;
+      flex-shrink: 0;
+      transition: transform 0.25s ease;
+      cursor: default;
+    }
+    .image-box:hover {
+      transform: scale(1.03);
+      box-shadow: 0 18px 38px rgba(0, 85, 204, 0.2);
+    }
+
+    .image-box img {
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 2px solid #007bff;
+      box-shadow: 0 8px 20px rgba(0, 123, 255, 0.25);
+      transition: box-shadow 0.3s ease;
+      object-fit: contain;
+    }
+    .image-box img:hover {
+      box-shadow: 0 20px 45px rgba(0, 123, 255, 0.5);
+    }
+
+    .label {
+      font-weight: 700;
+      font-size: 1.3rem;   /* slightly increased */
+      color: #004aad;
+      margin-bottom: 1rem;
+      display: block;
+      letter-spacing: 0.03em;
+      user-select: none;
+    }
+
+    .error-message {
+      color: #b00020;
+      background: #fdecea;
+      border: 1px solid #f5c6cb;
+      max-width: 480px;
+      margin: 1rem auto 2rem;
+      padding: 1rem 1.3rem;
+      font-weight: 600;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(176, 0, 32, 0.15);
+      user-select: none;
+    }
+
+    .loader {
+      margin-top: 1rem;
+      font-weight: 700;
+      color: #004aad;
+      font-size: 1.15rem;
+      user-select: none;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Solar Panel Cell Detection & Classification</h1>
+
+  <form id="uploadForm" enctype="multipart/form-data" autocomplete="off" novalidate>
+    <div class="file-input-wrapper" id="fileInputWrapper">
+      <input type="file" name="image" id="imageInput" accept="image/*" required />
+      <label class="file-input-label" for="imageInput">Choose Image</label>
+    </div>
+
+    <button type="submit" id="uploadBtn">Upload & Detect</button>
+  </form>
+
+  <div id="loader" class="loader hidden">Processing Image... Please wait.</div>
+  <div id="error" class="error-message hidden"></div>
+
+  <div class="images-container hidden" id="resultsContainer" aria-live="polite" aria-atomic="true">
+    <div class="image-box">
+      <span class="label">Original Image</span>
+      <img id="originalImg" alt="Original Image" onerror="this.src='https://via.placeholder.com/800x600?text=Load+Error'" />
+    </div>
+    <div class="image-box">
+      <span class="label">Detected Cells</span>
+      <img id="processedImg" alt="Detected Image" onerror="this.src='https://via.placeholder.com/800x600?text=Load+Error'" />
+    </div>
+    <div class="image-box">
+      <span class="label">Classified Cells (Good/Bad)</span>
+      <img id="classifiedImg" alt="Classified Image" onerror="this.src='https://via.placeholder.com/800x600?text=Load+Error'" />
+    </div>
+    <div class="image-box">
+      <span class="label">Multiclass Bad-Type Detection</span>
+      <img id="multiclassImg" alt="Multiclass Bad-Type Image" onerror="this.src='https://via.placeholder.com/800x600?text=Load+Error'" />
+    </div>
+  </div>
+
+  <script>
+    const loader = document.getElementById('loader');
+    const errorBox = document.getElementById('error');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const fileInputWrapper = document.getElementById('fileInputWrapper');
+    const fileInput = document.getElementById('imageInput');
+
+    document.getElementById('uploadForm').onsubmit = async function (e) {
+      e.preventDefault();
+      errorBox.classList.add('hidden');
+      resultsContainer.classList.add('hidden');
+
+      loader.classList.remove('hidden');
+      fileInputWrapper.classList.add('hidden');
+      uploadBtn.classList.add('hidden');
+
+      if (!fileInput.files.length) {
+        loader.classList.add('hidden');
+        alert("Please select an image.");
+        fileInputWrapper.classList.remove('hidden');
+        uploadBtn.classList.remove('hidden');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('image', fileInput.files[0]);
+
+      try {
+        const response = await fetch('/api/cell-detection', {
+          method: 'POST',
+          body: formData
+        });
+
+        loader.classList.add('hidden');
+
+        if (!response.ok) {
+          const error = await response.json();
+          errorBox.textContent = "Error: " + error.error;
+          errorBox.classList.remove('hidden');
+          fileInputWrapper.classList.remove('hidden');
+          uploadBtn.classList.remove('hidden');
+          return;
+        }
+
+        const data = await response.json();
+
+        document.getElementById('originalImg').src = `/original/${data.original_image}`;
+        document.getElementById('processedImg').src = `/processed/${data.processed_image}`;
+        document.getElementById('classifiedImg').src = `/processed/${data.classified_image}`;
+        document.getElementById('multiclassImg').src = `/processed/${data.multiclass_image}`;
+
+        resultsContainer.classList.remove('hidden');
+        fileInputWrapper.classList.remove('hidden');
+        uploadBtn.classList.remove('hidden');
+      } catch (err) {
+        loader.classList.add('hidden');
+        console.error(err);
+        errorBox.textContent = "Unexpected error occurred. Please try again.";
+        errorBox.classList.remove('hidden');
+        fileInputWrapper.classList.remove('hidden');
+        uploadBtn.classList.remove('hidden');
+      }
+    };
+  </script>
+</body>
+</html>

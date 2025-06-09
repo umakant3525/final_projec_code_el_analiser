@@ -1,0 +1,13 @@
+# Ignore virtual environment
+venv/
+
+# Ignore PyTorch and other model files
+*.pt
+
+# Ignore Python cache
+__pycache__/
+
+# Ignore system files
+*.pyc
+.DS_Store
+git init
